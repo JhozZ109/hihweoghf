@@ -1,0 +1,134 @@
+class Vaga:
+    """Representa uma única vaga dentro de um setor."""
+    def __init__(self, titulo, descricao, tipo_contrato="CLT", status="Aberta"):
+        self.titulo = titulo
+        self.descricao = descricao
+        self.tipo_contrato = tipo_contrato  # Ex: CLT, PJ, Estágio
+        self.status = status                # Ex: Aberta, Fechada, Em Análise
+
+    def __str__(self):
+        """Retorna uma representação amigável da vaga."""
+        return f"[{self.status}] {self.titulo} ({self.tipo_contrato})"
+    
+    def detalhe(self):
+        """Retorna os detalhes completos da vaga."""
+        return (
+            f"Vaga: {self.titulo}\n"
+            f"Descrição: {self.descricao}\n"
+            f"Contrato: {self.tipo_contrato}\n"
+            f"Status: {self.status}"
+        )
+
+class Setor:
+    """Representa um departamento da faculdade e contém suas vagas."""
+    def __init__(self, nome, responsavel):
+        self.nome = nome
+        self.responsavel = responsavel
+        self.vagas = []  # Lista que armazena objetos Vaga
+
+    def adicionar_vaga(self, vaga):
+        """Adiciona um objeto Vaga à lista de vagas do setor."""
+        self.vagas.append(vaga)
+        print(f"✅ Vaga '{vaga.titulo}' adicionada ao setor '{self.nome}'.")
+
+    def __str__(self):
+        """Retorna o nome do setor e o número de vagas abertas."""
+        vagas_abertas = self.contar_vagas_por_status("Aberta")
+        return f"Setor: {self.nome} | Responsável: {self.responsavel} | Vagas Abertas: {vagas_abertas}"
+
+    def contar_vagas_por_status(self, status):
+        """Conta o número de vagas com um status específico."""
+        return sum(1 for vaga in self.vagas if vaga.status == status)
+
+class SistemaVagas:
+    """Gerencia todos os setores e operações de vagas da faculdade."""
+    def __init__(self):
+        self.setores = {}  # Dicionário onde a chave é o nome do setor e o valor é o objeto Setor
+
+    def adicionar_setor(self, nome, responsavel):
+        """Cria e adiciona um novo objeto Setor ao sistema."""
+        if nome in self.setores:
+            print(f"⚠️ Erro: O setor '{nome}' já existe.")
+            return
+        
+        novo_setor = Setor(nome, responsavel)
+        self.setores[nome] = novo_setor
+        print(f"✔️ Setor '{nome}' adicionado com sucesso.")
+
+    def cadastrar_vaga(self, nome_setor, vaga):
+        """Adiciona um objeto Vaga a um Setor existente."""
+        if nome_setor not in self.setores:
+            print(f"❌ Erro: Setor '{nome_setor}' não encontrado.")
+            return
+
+        self.setores[nome_setor].adicionar_vaga(vaga)
+
+    def listar_todos_setores(self):
+        """Exibe um resumo de todos os setores e suas vagas abertas."""
+        print("\n--- 🎓 VISÃO GERAL DOS SETORES DA FACULDADE ---")
+        if not self.setores:
+            print("Nenhum setor cadastrado.")
+            return
+        
+        for nome, setor in self.setores.items():
+            print(str(setor))
+            for vaga in setor.vagas:
+                if vaga.status == "Aberta":
+                    print(f"  > {str(vaga)}")
+        print("--------------------------------------------------")
+
+    def alterar_status_vaga(self, nome_setor, titulo_vaga, novo_status):
+        """Altera o status de uma vaga específica."""
+        if nome_setor not in self.setores:
+            print(f"❌ Erro: Setor '{nome_setor}' não encontrado.")
+            return
+        
+        setor = self.setores[nome_setor]
+        for vaga in setor.vagas:
+            if vaga.titulo.lower() == titulo_vaga.lower():
+                vaga.status = novo_status
+                print(f"🔄 Status da vaga '{vaga.titulo}' no setor '{nome_setor}' alterado para '{novo_status}'.")
+                return
+        
+        print(f"❌ Erro: Vaga '{titulo_vaga}' não encontrada no setor '{nome_setor}'.")
+
+# --- EXECUÇÃO E TESTE DO SISTEMA ---
+# 1. Inicializa o sistema
+faculdade_vagas = SistemaVagas()
+
+print("--- FASE 1: Configuração Inicial ---")
+# 2. Adiciona setores
+faculdade_vagas.adicionar_setor("Secretaria Acadêmica", "Dr. Almeida")
+faculdade_vagas.adicionar_setor("Departamento de TI", "Prof. Carla")
+
+# 3. Cadastra vagas usando objetos Vaga
+vaga_ti_1 = Vaga("Desenvolvedor Back-end Sênior", 
+                 "Desenvolvimento e manutenção da plataforma de ensino.", 
+                 tipo_contrato="PJ")
+vaga_ti_2 = Vaga("Suporte Técnico Nível 1", 
+                 "Atendimento e suporte aos usuários dos laboratórios.", 
+                 tipo_contrato="CLT")
+vaga_secretaria_1 = Vaga("Auxiliar de Matrícula", 
+                         "Atendimento a alunos e organização de documentos.", 
+                         tipo_contrato="Estágio")
+
+faculdade_vagas.cadastrar_vaga("Departamento de TI", vaga_ti_1)
+faculdade_vagas.cadastrar_vaga("Departamento de TI", vaga_ti_2)
+faculdade_vagas.cadastrar_vaga("Secretaria Acadêmica", vaga_secretaria_1)
+
+# 4. Exibe a situação inicial
+faculdade_vagas.listar_todos_setores()
+
+print("\n--- FASE 2: Operações e Alterações ---")
+# 5. Adiciona mais um setor e uma vaga
+faculdade_vagas.adicionar_setor("Marketing", "Sra. Juliana")
+vaga_mkt_1 = Vaga("Especialista em Mídias Digitais", 
+                  "Gerenciamento de campanhas de publicidade online.", 
+                  tipo_contrato="CLT")
+faculdade_vagas.cadastrar_vaga("Marketing", vaga_mkt_1)
+
+# 6. Altera o status de uma vaga
+faculdade_vagas.alterar_status_vaga("Departamento de TI", "Suporte Técnico Nível 1", "Fechada")
+
+# 7. Exibe a situação final
+faculdade_vagas.listar_todos_setores()
